@@ -1,0 +1,34 @@
+name: Update repository metadata
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/repo-metadata.yml
+
+permissions:
+  administration: write
+
+jobs:
+  about:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set description and topics
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -fsSL -X PATCH \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}" \
+            -d '{"description":"MRI super-resolution & anti-aliasing (DIP project, SMORE-inspired U-Net)"}'
+
+          curl -fsSL -X PUT \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/topics" \
+            -d '{"names":["mri","super-resolution","pytorch","unet","medical-imaging"]}'
+
+          echo "Repository description and topics updated."
