@@ -1,0 +1,13 @@
+# SMORE DIP — MRI Super-Resolution (Python 3.9+)
+# Install PyTorch separately for your CUDA version: https://pytorch.org
+
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.23.0
+nibabel>=5.0.0
+scikit-image>=0.21.0
+matplotlib>=3.7.0
+tqdm>=4.65.0
+kagglehub>=0.2.0
+jupyter>=1.0.0
+ipykernel>=6.0.0

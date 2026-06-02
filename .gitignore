@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data & models (download at runtime)
+data/
+*.nii
+*.nii.gz
+best_model.pth
+*.pt
+*.pth
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Kaggle cache
+.kaggle/
+kagglehub/
+
+# Colab
+.drive_upload/
+
+# Logs
+*.log
+
+# Large local copy at repo root (outputs embedded); use notebooks/ version in git
+/SMORE_DIP_Project.ipynb
