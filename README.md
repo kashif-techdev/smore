@@ -14,6 +14,7 @@
   <img src="https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C?logo=pytorch&logoColor=white" alt="PyTorch"/>
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License"/>
   <img src="https://img.shields.io/badge/Dataset-IXI%20Brain%20MRI-purple" alt="Dataset"/>
+  <a href="https://github.com/kashif-techdev/smore/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/kashif-techdev/smore/ci.yml?branch=main&label=CI" alt="CI"/></a>
 </p>
 
 <p align="center">
@@ -33,6 +34,17 @@ The work is motivated by:
 
 Our implementation is a **supervised U-Net baseline** on real **IXI** NIfTI volumes (skull-stripped, MNI-registered), with rigorous **PSNR / SSIM** evaluation and ablation against classical bicubic upsampling.
 
+### What's new in v1.1
+
+| Feature | Description |
+|---------|-------------|
+| **Subject-level splits** | Train/val/test partitioned by **patient**, preventing slice leakage across splits |
+| **MSE + SSIM loss** | Differentiable `CombinedLoss` (weights `1.0` / `0.2`) for better structural quality |
+| **CI smoke tests** | GitHub Actions runs `scripts/smoke_test.py` on every push |
+| **CITATION.cff** | Machine-readable citation metadata for GitHub/Zenodo |
+
+> Figures below are from the **v1.0** run (slice-level split, MSE-only). Re-run the notebook after pulling v1.1 to refresh metrics with subject splits and combined loss.
+
 ---
 
 ## Key Results
@@ -44,7 +56,7 @@ Our implementation is a **supervised U-Net baseline** on real **IXI** NIfTI volu
 | **U-Net (ours)** | **32.20** | 0.8285 |
 | **Gain vs. bicubic** | **+2.95 dB** | — |
 
-> **Takeaway:** The network improves **pixel fidelity (PSNR)** substantially. SSIM is slightly lower than the blurry input—a common trade-off with **MSE-only** training; adding SSIM or perceptual loss is a documented next step in the notebook.
+> **Takeaway:** The network improves **pixel fidelity (PSNR)** substantially. v1.1 adds **SSIM loss** to improve structural similarity; re-train to update the metrics below.
 
 **Best validation during training:** 32.06 dB PSNR · 0.829 SSIM (epoch 17, Tesla T4).
 
@@ -128,14 +140,15 @@ SMORE’s clinical motivation includes preserving **anatomical boundaries**. Sob
 smore/
 ├── notebooks/
 │   └── SMORE_DIP_Project.ipynb   # Full pipeline (run top-to-bottom)
-├── docs/
-│   └── assets/                   # Figures for README & reports
-│       ├── real_mri_slices.png
-│       ├── degradation_simulation.png
-│       ├── training_curves.png
-│       ├── test_comparison.png
-│       ├── ablation_study.png
-│       └── edge_sharpness.png
+├── src/smore/
+│   ├── losses.py                 # CombinedLoss, SSIMLoss
+│   └── splits.py                 # subject_level_split()
+├── scripts/
+│   ├── smoke_test.py             # CI smoke tests
+│   └── set_github_about.py       # Update repo description/topics (API)
+├── docs/assets/                  # Figures for README & reports
+├── .github/workflows/ci.yml
+├── CITATION.cff
 ├── requirements.txt
 ├── LICENSE
 └── README.md
@@ -151,7 +164,7 @@ smore/
 | **Files used** | `mri_IXI_480_2/wm*.nii` — skull-stripped, registered volumes |
 | **Subjects in experiment** | 30 (of 397 available volumes) |
 | **2D slices** | 3,201 axial slices @ 128×128 |
-| **Split** | 70% train · 15% val · 15% test (slice-level) |
+| **Split** | 70% train · 15% val · 15% test (**subject-level**, v1.1) |
 
 The notebook downloads ~4.2 GB automatically through `kagglehub` on first run.
 
@@ -165,7 +178,7 @@ The notebook downloads ~4.2 GB automatically through `kagglehub` on first run.
 | **Parameters** | 7,762,465 |
 | **Input** | Aliased LR slice (1×128×128) |
 | **Target** | HR slice (1×128×128) |
-| **Loss** | MSE |
+| **Loss** | MSE + SSIM (`CombinedLoss`, v1.1) |
 | **Optimizer** | Adam (lr=1e-3, weight_decay=1e-5) |
 | **Scheduler** | ReduceLROnPlateau |
 | **Epochs** | 20 (early stopping, patience=5) |
@@ -217,9 +230,9 @@ jupyter notebook notebooks/SMORE_DIP_Project.ipynb
 
 | Change | Expected benefit |
 |--------|------------------|
-| Subject-level train/val/test split | More honest generalization |
 | `NUM_SUBJECTS` → 80+ | Better coverage of anatomy |
-| 50–100 epochs + SSIM loss | Higher perceptual quality |
+| 50–100 epochs | Lower loss, better convergence |
+| Tune `SSIM_WEIGHT` (default `0.2`) | Balance PSNR vs perceptual quality |
 | `base_features` 64 | Greater model capacity |
 
 ---
@@ -229,7 +242,7 @@ jupyter notebook notebooks/SMORE_DIP_Project.ipynb
 | Published SMORE | This repository |
 |-----------------|-----------------|
 | Self-supervised anti-aliasing + SR framework | Supervised U-Net (HR targets) |
-| Full SMORE network & training objective | Standard encoder–decoder U-Net + MSE |
+| Full SMORE network & training objective | Standard encoder–decoder U-Net + MSE + SSIM |
 | Paper-specific MRI evaluation protocol | 2D axial slices, synthetic 4× aliasing |
 
 We cite SMORE as **conceptual motivation**; this repo is a **DIP teaching implementation**, not an official reproduction.
@@ -243,6 +256,10 @@ We cite SMORE as **conceptual motivation**; this repo is a **DIP teaching implem
 3. Preprocessed IXI (Kaggle). https://www.kaggle.com/datasets/hamedamin/preprocessed-oasis-and-epilepsy-and-ixi  
 
 ---
+
+## Citation
+
+If you use this repository, please cite our software ([`CITATION.cff`](CITATION.cff)) and the original SMORE paper (Zhao et al., IEEE TMI 2021).
 
 ## License
 

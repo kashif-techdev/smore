@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+title: "SMORE: MRI Super-Resolution & Anti-Aliasing (DIP Project)"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - family-names: Kashif
+    given-names: Muhammad
+  - family-names: Afaq
+    given-names: Abdulrehman
+  - family-names: Habib
+    given-names: Umair
+repository-code: "https://github.com/kashif-techdev/smore"
+url: "https://github.com/kashif-techdev/smore"
+license: MIT
+version: 1.1.0
+date-released: 2026-06-02
+keywords:
+  - mri
+  - super-resolution
+  - anti-aliasing
+  - deep-learning
+  - unet
+  - medical-imaging
+preferred-citation:
+  type: article
+  title: "SMORE: A Self-supervised Anti-aliasing and Super-resolution Algorithm for MRI Using Deep Learning"
+  authors:
+    - family-names: Zhao
+      given-names: Yi
+  year: 2021
+  doi: 10.1109/TMI.2020.3037187
+  journal: IEEE Transactions on Medical Imaging
