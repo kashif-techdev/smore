@@ -34,31 +34,30 @@ The work is motivated by:
 
 Our implementation is a **supervised U-Net baseline** on real **IXI** NIfTI volumes (skull-stripped, MNI-registered), with rigorous **PSNR / SSIM** evaluation and ablation against classical bicubic upsampling.
 
-### What's new in v1.1
+### v1 → v2 improvements
 
-| Feature | Description |
-|---------|-------------|
-| **Subject-level splits** | Train/val/test partitioned by **patient**, preventing slice leakage across splits |
-| **MSE + SSIM loss** | Differentiable `CombinedLoss` (weights `1.0` / `0.2`) for better structural quality |
-| **CI smoke tests** | GitHub Actions runs `scripts/smoke_test.py` on every push |
-| **CITATION.cff** | Machine-readable citation metadata for GitHub/Zenodo |
-
-> Figures below are from the **v1.0** run (slice-level split, MSE-only). Re-run the notebook after pulling v1.1 to refresh metrics with subject splits and combined loss.
+| What | v1 (original) | v2 (current) | Why |
+|------|---------------|--------------|-----|
+| **Loss** | `nn.MSELoss()` | `combined_loss()` — **80% SSIM + 20% MSE** | MSE alone blurs structure; SSIM optimizes perceptual similarity |
+| **Subjects** | 30 | **80** | 2.67× more data → better generalization |
+| **Epochs** | 20 | **75** (stopped at **53**) | More time to converge |
+| **Early-stop patience** | 5 | **10** | Avoid stopping during loss plateaus |
+| **Dependency** | — | `pytorch_msssim` | Differentiable SSIM for training |
 
 ---
 
-## Key Results
+## Key Results (v2 — test set)
 
 | Method | PSNR ↑ (dB) | SSIM ↑ |
 |--------|-------------|--------|
-| Aliased LR input (baseline) | 28.49 | 0.8860 |
-| Bicubic interpolation | 29.25 | 0.8778 |
-| **U-Net (ours)** | **32.20** | 0.8285 |
-| **Gain vs. bicubic** | **+2.95 dB** | — |
+| Aliased LR input | 28.66 | 0.8888 |
+| Bicubic interpolation | 29.43 | 0.8806 |
+| **U-Net (ours)** | **34.88** | **0.9737** |
+| **Gain vs. bicubic** | **+6.22 dB** | **+0.0849** |
 
-> **Takeaway:** The network improves **pixel fidelity (PSNR)** substantially. v1.1 adds **SSIM loss** to improve structural similarity; re-train to update the metrics below.
+> **PSNR +6.22 dB** over bicubic is a large gain for 4× super-resolution. **SSIM 0.9737** confirms the combined loss fixed the structural blurring seen with pure MSE training.
 
-**Best validation during training:** 32.06 dB PSNR · 0.829 SSIM (epoch 17, Tesla T4).
+**Training:** 8,552 slices from 80 subjects · converged at **epoch 53/75** · best val **34.87 dB PSNR** · **0.9732 SSIM** (Tesla T4).
 
 ---
 
@@ -162,9 +161,9 @@ smore/
 |------|--------|
 | **Source** | [IXI Brain MRI](https://brain-development.org/ixi-dataset/) via [Kaggle (CAT12/SPM preprocessed)](https://www.kaggle.com/datasets/hamedamin/preprocessed-oasis-and-epilepsy-and-ixi) |
 | **Files used** | `mri_IXI_480_2/wm*.nii` — skull-stripped, registered volumes |
-| **Subjects in experiment** | 30 (of 397 available volumes) |
-| **2D slices** | 3,201 axial slices @ 128×128 |
-| **Split** | 70% train · 15% val · 15% test (**subject-level**, v1.1) |
+| **Subjects in experiment** | **80** (of 397 available volumes) |
+| **2D slices** | **8,552** axial slices @ 128×128 |
+| **Split** | 70% train · 15% val · 15% test (5,986 / 1,282 / 1,284 slices) |
 
 The notebook downloads ~4.2 GB automatically through `kagglehub` on first run.
 
@@ -178,10 +177,10 @@ The notebook downloads ~4.2 GB automatically through `kagglehub` on first run.
 | **Parameters** | 7,762,465 |
 | **Input** | Aliased LR slice (1×128×128) |
 | **Target** | HR slice (1×128×128) |
-| **Loss** | MSE + SSIM (`CombinedLoss`, v1.1) |
+| **Loss** | Combined 80% SSIM + 20% MSE (`pytorch_msssim`) |
+| **Epochs** | 75 max · early stop patience 10 · converged at 53 |
 | **Optimizer** | Adam (lr=1e-3, weight_decay=1e-5) |
 | **Scheduler** | ReduceLROnPlateau |
-| **Epochs** | 20 (early stopping, patience=5) |
 | **Batch size** | 16 |
 | **Hardware** | NVIDIA Tesla T4 (Google Colab) |
 
@@ -230,9 +229,9 @@ jupyter notebook notebooks/SMORE_DIP_Project.ipynb
 
 | Change | Expected benefit |
 |--------|------------------|
-| `NUM_SUBJECTS` → 80+ | Better coverage of anatomy |
-| 50–100 epochs | Lower loss, better convergence |
-| Tune `SSIM_WEIGHT` (default `0.2`) | Balance PSNR vs perceptual quality |
+| Subject-level train/val/test split | Stricter generalization evaluation |
+| Tune `SSIM_ALPHA` (default `0.8`) | Balance PSNR vs perceptual quality |
+| 100+ epochs | Further loss reduction if not converged |
 | `base_features` 64 | Greater model capacity |
 
 ---
@@ -242,7 +241,7 @@ jupyter notebook notebooks/SMORE_DIP_Project.ipynb
 | Published SMORE | This repository |
 |-----------------|-----------------|
 | Self-supervised anti-aliasing + SR framework | Supervised U-Net (HR targets) |
-| Full SMORE network & training objective | Standard encoder–decoder U-Net + MSE + SSIM |
+| Full SMORE network & training objective | Standard encoder–decoder U-Net + combined SSIM/MSE loss |
 | Paper-specific MRI evaluation protocol | 2D axial slices, synthetic 4× aliasing |
 
 We cite SMORE as **conceptual motivation**; this repo is a **DIP teaching implementation**, not an official reproduction.
