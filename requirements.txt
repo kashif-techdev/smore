@@ -9,5 +9,6 @@ scikit-image>=0.21.0
 matplotlib>=3.7.0
 tqdm>=4.65.0
 kagglehub>=0.2.0
+pytorch-msssim>=1.0.0
 jupyter>=1.0.0
 ipykernel>=6.0.0
