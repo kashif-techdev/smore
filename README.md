@@ -94,7 +94,8 @@ flowchart TB
 Nearest-neighbor downsampling **without** anti-aliasing introduces ringing and jagged structures; bicubic downsampling is smoother but blurrier. The model is trained to invert the **aliased** path.
 
 <p align="center">
-  <img src="docs/assets/degradation_simulation.png" alt="HR vs Bicubic vs Aliased degradation" width="900"/>
+  <img width="1301" height="856" alt="image" src="https://github.com/user-attachments/assets/e352085a-1533-47c1-a0a1-1a306d919007" />
+
   <br/>
   <em>Ground truth vs. bicubic LR vs. aliased LR (4× factor)</em>
 </p>
