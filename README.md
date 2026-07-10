@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/real_mri_slices.png" alt="IXI Brain MRI Slices" width="720"/>
+  <img width="1289" height="495" alt="image" src="https://github.com/user-attachments/assets/dc9b5418-bf56-41bc-8243-615fb5eec925" />
 </p>
 
 <h1 align="center">🧠 SMORE — MRI Super-Resolution & Anti-Aliasing</h1>
